@@ -5,7 +5,7 @@ Created on Thu Mar 19 10:39:56 2020
 
 @author: pi
 """
-import pandas
+import pandas as pd
 from adafruit_servokit import ServoKit
 import adafruit_motor.servo
 
@@ -35,7 +35,7 @@ pwmMinArr=[371, 371 , 371 ,371 ,341 ,1000 ,1000 ,1000 ,1000];
 angleOffsetArr=[0,0,0,0,0,0,0,0,0];
 angleMaxArr=[0,0,0,0,0,0,0,0,0];
 angleMinArr=[0,0,0,0,0,0,0,0,0];
-angleRangeArr[180; 180; 180; 180; 180; 180; 180; 180; 180;]
+angleRangeArr=[180, 180, 180, 180, 180, 180, 180, 180, 180]
 
 Cal=pd.DataFrame({'Servo_Position':ServoPos,
                   'Pin_ID':pinId,
@@ -46,11 +46,29 @@ Cal=pd.DataFrame({'Servo_Position':ServoPos,
                   'Angle_min':angleMinArr,
                   'Angle_Range':angleRangeArr})
 
-def LoadCalibration():
+def LoadCalibration(path):
+    CalStrArr=open(path).readlines()
+    CalDict={}
+    for i in CalStrArr:
+        CalStrRow=i.split('=')
+        
+        # Header
+        CalibratableName=CalStrRow[0]
+        
+        # Values
+        try:
+            CalRow= list(map(float,CalStrRow[1].split(',')))
+        
+        except:
+            CalRow=list(map(str,CalStrRow[1].split(',')))
+        
+        CalDict.update({CalibratableName:CalRow});
+        Cal=pd.DataFrame(CalDict)
+    return Cal
+        #df=pd.DataFrame({CalibratableName:CalRow})
     
-    
-    for i in range(0:len(Cal['Pin_ID'])):
-        Servo.id(i).calibrate()  
+    #for i in range(0:len(Cal['Pin_ID'])):
+        #Servo.id(i).calibrate()  
 
 
 class ServoClass(object):
