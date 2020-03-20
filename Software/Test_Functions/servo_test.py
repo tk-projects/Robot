@@ -76,15 +76,20 @@ class ServoClass(object):
         angleOffset=Cal['Angle_Offset'][self._id]
         angleMax=Cal['Angle_max'][self._id]
         angleMin=Cal['Angle_min'][self._id]
+        angleFac=Cal['Angle_Factor'][self._id]
         
-        val=val+angleOffset
+        val=int(val*angleFac)+int(angleOffset)
         
         if val>angleMax:
             val=angleMax
         if val<angleMin:
             val=angleMin
         
-        kit.servo[self._id].angle=val+angleOffset
+        kit.servo[self._id].angle=val
+        print(val)
+        print(angleOffset)
+        val=val+angleOffset
+        #print(val)
         return val
     
     def calibrate(self,Cal):
@@ -98,3 +103,4 @@ class ServoClass(object):
     
         
 Servo=ServoClass()
+Cal=LoadCalibration('/home/pi/Robot/RobotSW/Calibration/ServoCalibration.txt')
