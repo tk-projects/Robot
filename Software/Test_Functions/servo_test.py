@@ -15,62 +15,47 @@ import adafruit_pca9685
 i2c = busio.I2C(board.SCL, board.SDA)
 pca = adafruit_pca9685.PCA9685(i2c)
 
-idxServo=0
-
 kit = ServoKit(channels=16)
 pca.frequency=50
-#servo=adafruit_motor.servo.Servo(0)
-
 
 #Pin IDs
 vl1=0; vl2=1; vr1=2; vr2=3; hl1=4; hl2=5; hr1=6; hr2=7; hg1=8
 pinId=[vl1, vl2 ,vr1, vr2, hl1, hl2, hr1, hr2, hg1];
 
-## Calibration
-#Servo ID
-ID=[0, 1, 2, 3, 4, 5, 6, 7, 8]
-ServoPos=['vl1','vl2','vr1','vr2','hl1','hl2','hr1','hr2','hg1'];
-pwmMaxArr=[2950, 2791, 2835, 2735, 2850, 2000, 2000, 2000, 2000];
-pwmMinArr=[371, 371 , 371 ,371 ,341 ,1000 ,1000 ,1000 ,1000];
-angleOffsetArr=[0,0,0,0,0,0,0,0,0];
-angleMaxArr=[0,0,0,0,0,0,0,0,0];
-angleMinArr=[0,0,0,0,0,0,0,0,0];
-angleRangeArr=[180, 180, 180, 180, 180, 180, 180, 180, 180]
-
-Cal=pd.DataFrame({'Servo_Position':ServoPos,
-                  'Pin_ID':pinId,
-                  'PWM_max':pwmMaxArr,
-                  'PWM_min':pwmMinArr,
-                  'Angle_Offset':angleOffsetArr,
-                  'Angle_max':angleMaxArr,
-                  'Angle_min':angleMinArr,
-                  'Angle_Range':angleRangeArr})
 
 def LoadCalibration(path):
     CalStrArr=open(path).readlines()
     CalDict={}
-    for i in CalStrArr:
-        CalStrRow=i.split('=')
-        
+    
+    for i in range(0,len(CalStrArr)):
+        CalStrRow=CalStrArr[i].split('=')
+                
         # Header
         CalibratableName=CalStrRow[0]
         
         # Values
         try:
-            CalRow= list(map(float,CalStrRow[1].split(',')))
+            list(map(float,CalStrRow[1].rstrip('\n').split(',')))
+            CalRow= list(map(float,CalStrRow[1].rstrip('\n').split(',')))
+            CalDict.update({CalibratableName:CalRow});
+            continue
+
+        except ValueError:
+            CalRow=list(map(str,CalStrRow[1].rstrip('\n').split(',')))
+            CalDict.update({CalibratableName:CalRow});
+            continue
         
-        except:
-            CalRow=list(map(str,CalStrRow[1].split(',')))
-        
-        CalDict.update({CalibratableName:CalRow});
-        Cal=pd.DataFrame(CalDict)
-    return Cal
-        #df=pd.DataFrame({CalibratableName:CalRow})
+    #Create Dataframe    
+    Cal=pd.DataFrame(CalDict)
     
-    #for i in range(0:len(Cal['Pin_ID'])):
-        #Servo.id(i).calibrate()  
+    # Set Calibration  
+    for i in range(0,len(Cal)):
+        Servo.id(i).calibrate(Cal)
 
+    print("\nSet the following calibration: \n\n %s " % (Cal))
+    return Cal
 
+    
 class ServoClass(object):
     def __init__(self):
         self._id=None
@@ -102,7 +87,7 @@ class ServoClass(object):
         kit.servo[self._id].angle=val+angleOffset
         return val
     
-    def calibrate(self):
+    def calibrate(self,Cal):
         angleRange=Cal['Angle_Range'][self._id];
         pwm_min=Cal['PWM_min'][self._id];
         pwm_max=Cal['PWM_max'][self._id];
@@ -113,5 +98,3 @@ class ServoClass(object):
     
         
 Servo=ServoClass()
-
-#servo.id(42).angle(2)
