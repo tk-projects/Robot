@@ -35,6 +35,8 @@ class ServoClass(object):
     def __init__(self):
         self._id=None
         self.angleVal=None
+        self.alpha = None
+        self.beta = None
         
     def id(self, id):
         self._id=int(id)
@@ -85,12 +87,14 @@ class ServoClass(object):
     def stand(self,height):
         h=height;   
         # calculate alpha, angle btw upper thigh and body
-        h2 = (l1**2-l2**2-h**2)/(2*h);
+        h2 = (l1**2-l2**2-h**2)/(-2*h);
         h1 = h-h2;
         
-        alpha=toDeg(np.arccos(h1/l2))+90+self._id;
-        beta=180-toDeg(np.arccos(h2/l2));
+        print(h1,h2)
         
+        alpha=toDeg(np.arccos(h1/l2))+90;
+        beta=180-toDeg(np.arccos(h1/l2));
+
         return [alpha, beta]
         
         
