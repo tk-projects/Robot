@@ -26,7 +26,7 @@ def LegStand(leg, height):
         beta=180-toDeg(np.arccos(h1/l1))-toDeg(np.arccos(h2/l2));
 
         # min. angle alpha or max height for stability
-        h_max=21.5
+        h_max=22
         alphaOff=52
         betaOff=48
         alphaFin=alpha-alphaOff
