@@ -92,8 +92,8 @@ class ServoClass(object):
         
         print(h1,h2)
         
-        alpha=toDeg(np.arccos(h1/l2))+90;
-        beta=180-toDeg(np.arccos(h1/l2));
+        alpha=toDeg(np.arccos(h1/l1))+90;
+        beta=180-toDeg(np.arccos(h1/l1))-toDeg(np.arccos(h2/l2));
 
         return [alpha, beta]
         
