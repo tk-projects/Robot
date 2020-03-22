@@ -28,7 +28,7 @@ pinId=[vl1, vl2 ,vr1, vr2, hl1, hl2, hr1, hr2, hg1];
 
 # Leg Geometry
 l1=6.7 # length in cm from joint to joint of the upper thigh
-l2=15 # length in cm from joint to joint of the lower thigh
+l2=15.5 # length in cm from joint to joint of the lower thigh
 
 
 class ServoClass(object):
@@ -69,11 +69,20 @@ class ServoClass(object):
         if val<angleMin:
             val=angleMin
         
+        
+#        while True:
+#            for angle in range(0, 180, 5):  # 0 - 180 degrees, 5 degrees at a time.
+#                my_servo.angle = angle
+#                time.sleep(0.05)
+#            for angle in range(180, 0, -5): # 180 - 0 degrees, 5 degrees at a time.
+#                my_servo.angle = angle
+#                time.sleep(0.05)
+        
+        
         kit.servo[self._id].angle=val
         print(val)
         print(angleOffset)
         val=val+angleOffset
-        #print(val)
         return val
     
     def calibrate(self, Cal):
@@ -89,12 +98,21 @@ class ServoClass(object):
         # calculate alpha, angle btw upper thigh and body
         h2 = (l1**2-l2**2-h**2)/(-2*h);
         h1 = h-h2;
-        
         print(h1,h2)
-        
         alpha=toDeg(np.arccos(h1/l1))+90;
         beta=180-toDeg(np.arccos(h1/l1))-toDeg(np.arccos(h2/l2));
 
+
+        # min. angle alpha or max height for stability
+        h_max=21.5
+        alphaOff=52
+        betaOff=48
+        alphaFin=alpha-alphaOff
+        betaFin=beta-betaOff
+        
+        print("\n alpha = %s " % (alphaFin))
+        print("\n beta = %s " % (betaFin))
+               
         return [alpha, beta]
         
         
