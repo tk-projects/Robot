@@ -52,7 +52,7 @@ class ServoClass(object):
         angleVal=(kit.servo[self._id].angle-angleOffset)/angleFac
         if angleVal<0:
             angleVal=0
-        return int(angleVal)
+        return int(round(angleVal))
         
     @Angle.setter
     def Angle(self, val):
@@ -80,8 +80,8 @@ class ServoClass(object):
         
         
         kit.servo[self._id].angle=val
-        print(val)
-        print(angleOffset)
+        #print(val)
+        #print(angleOffset)
         val=val+angleOffset
         return val
     
@@ -92,41 +92,3 @@ class ServoClass(object):
         
         kit.servo[self._id].actuation_range = angleRange;
         kit.servo[self._id].set_pulse_width_range(pwm_min, pwm_max);
-        
-    def stand(self,height):
-        h=height;   
-        # calculate alpha, angle btw upper thigh and body
-        h2 = (l1**2-l2**2-h**2)/(-2*h);
-        h1 = h-h2;
-        print(h1,h2)
-        alpha=toDeg(np.arccos(h1/l1))+90;
-        beta=180-toDeg(np.arccos(h1/l1))-toDeg(np.arccos(h2/l2));
-
-
-        # min. angle alpha or max height for stability
-        h_max=21.5
-        alphaOff=52
-        betaOff=48
-        alphaFin=alpha-alphaOff
-        betaFin=beta-betaOff
-        
-        print("\n alpha = %s " % (alphaFin))
-        print("\n beta = %s " % (betaFin))
-               
-        return [alpha, beta]
-        
-        
-
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
