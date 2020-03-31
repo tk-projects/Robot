@@ -26,10 +26,6 @@ pca.frequency=50
 vl1=0; vl2=1; vr1=2; vr2=3; hl1=4; hl2=5; hr1=6; hr2=7; hg1=8
 pinId=[vl1, vl2 ,vr1, vr2, hl1, hl2, hr1, hr2, hg1];
 
-# Leg Geometry
-l1=6.7 # length in cm from joint to joint of the upper thigh
-l2=15.5 # length in cm from joint to joint of the lower thigh
-
 
 class ServoClass(object):
     def __init__(self):
