@@ -5,12 +5,13 @@ Created on Sun Mar 22 16:34:57 2020
 
 @author: pi
 """
-import time
+import numpy as np;
 
 # Leg Geometry
 l1=6.7 # length in cm from joint to joint of the upper thigh
 l2=15.5 # length in cm from joint to joint of the lower thigh
-
+r1=l1
+r2=l2
 
 def LegStandVel(leg, height,angleStep=1):
         # get servo indices from leg
@@ -158,7 +159,7 @@ def LegStand(leg, height):
         return [alpha, beta]
     
     
-def LegStep(legArr,StepWidth, height, timeDiff=[0 0 0 0]) :
+def LegStep(legArr,StepWidth, height, timeDiff=[0,0,0,0]):
     
     d=StepWidth;
     h=height;
@@ -169,25 +170,36 @@ def LegStep(legArr,StepWidth, height, timeDiff=[0 0 0 0]) :
    # intersection line: y = -d/h*x - (r1²-r2²+d²+h²)/(2*h)
    # of the two circles dont intersect which each other, the step distance is two high and can not be realised
    # therefore the distance between both circles will be calculated:  
-   m = sqrt(d**2+h**2);
-   mLim = l1+l2;
-   dMax=sqrt(mLim**2-h**2);
+    m = sqrt(d**2+h**2);
+    mLim = l1+l2;
+    dMax=sqrt(mLim**2-h**2);
    
    # Program sequenc:
    # 1. Angle Calculation (StepAngleCalc)
    # 2. Lifting of the leg (LegLift)
    # 3. Step down (LegStepDown)
    # 4. Move to init. Position (initPos or LegStand)
-   
+
 def StepAngleCalc(StepWidth, height):
+    # Calculate intersection pionts:
+    # intersection line: y = -d/h*x - (r1²-r2²+d²+h²)/(2*h)
+    # Calculate intersection with first ciclce (from upper tigh)
+    h=height;
+    d=StepWidth;
     
-def LegLift(alphaLift,betaLift,LegA):
-    
-    
-   
-   
-   
-   
-   
+    A=(r1**2-r2**2+d**2+h**2)/(2*h);
+    x=symbols("x",real=True);
+    zeros=solve(x**2*(1+d**2/h**2)-2*d/h*x*A+A**2-r1**2,x);
+    print(zeros);
+
+    # chose one of the intersection points, smaller one
+    # and calculate coordinates
+    x=min(zeros);
+    y=sqrt(r1**2-x**2);
+    a=x/r1
+    print(a)
+    alpha=90-np.arcsin(a)
+    beta=90-alpha-toDeg(np.arcsin((d-x)/r2));
+    print('alpha=',alpha,'  beta=',beta);
     
     
