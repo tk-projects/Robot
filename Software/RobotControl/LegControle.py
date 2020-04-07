@@ -6,6 +6,7 @@ Created on Sun Mar 22 16:34:57 2020
 @author: pi
 """
 import numpy as np;
+from sympy import*
 
 # Leg Geometry
 l1=6.7 # length in cm from joint to joint of the upper thigh
@@ -134,24 +135,26 @@ def LegStand(leg, height):
         LegLowId = sorted(list(Cal['Servo_Pos']),key=len).index(LegLow);
         #print(LegUpId)
         
+        # min. angle alpha or max height for stability
+        h_max=22
         # calculate alpha, angle btw upper thigh and body
-        h=height;
+        h=min(height,h_max);
         h2 = (l1**2-l2**2-h**2)/(-2*h);
         h1 = h-h2;
         #print(h1,h2)
         alpha=toDeg(np.arccos(h1/l1))+90;
         beta=180-toDeg(np.arccos(h1/l1))-toDeg(np.arccos(h2/l2));
-
-        # min. angle alpha or max height for stability
-        h_max=22
+        print(alpha);
+        print(beta);
+        
         alphaOff=52
         betaOff=48
         alphaFin=alpha-alphaOff
         betaFin=beta-betaOff
         #print('\n Upper Leg %s' %(LegUpId))
-        #print("alpha = %s " % (alphaFin))
+        print("alpha = %s " % (alphaFin))
         #print('\n Lower Leg %s' %(LegLowId))
-        #print(" beta = %s " % (betaFin))
+        print(" beta = %s " % (betaFin))
         
         Servo.id(LegUpId).Angle=alphaFin
         Servo.id(LegLowId).Angle=betaFin
@@ -159,10 +162,10 @@ def LegStand(leg, height):
         return [alpha, beta]
     
     
-def LegStep(legArr,StepWidth, height, timeDiff=[0,0,0,0]):
+def LegStep(legArr,StepWidth, height, DelayArr=[0,0,0,0],vel=5):
     
     d=StepWidth;
-    h=height;
+    h=min(height,22);
     
    # to calculate the angles of upper and lower thigh, both thighs will be be represented by two circles
    # each circle has the radius of the length of one thigh, then the intersection line between both circles will be calculated
@@ -173,12 +176,63 @@ def LegStep(legArr,StepWidth, height, timeDiff=[0,0,0,0]):
     m = sqrt(d**2+h**2);
     mLim = l1+l2;
     dMax=sqrt(mLim**2-h**2);
-   
-   # Program sequenc:
+    d=min(StepWidth,dMax);
+
+   # Program sequence:
    # 1. Angle Calculation (StepAngleCalc)
    # 2. Lifting of the leg (LegLift)
    # 3. Step down (LegStepDown)
    # 4. Move to init. Position (initPos or LegStand)
+   
+   [alphaFin, betaFin] = StepAngleCalc(d,h)
+   betaLift=
+   step=vel
+   
+   LegIdArr=[];             # Array with the ids of the servos
+   LegStartAngleArr=[];     # Array to store starting angles of the servos
+   legMovemntProgArr=[];    # Array to track movement progress
+   legLiftDoneArr=[];       # Array to track wether lifting was completed
+   legStepdownDoneArr=[];   # Array to track wether stepping down was completed
+   legInitposDoneArr=[];    # Array to track wether init pos. was completed
+   
+   # Get starting position and other parameters of the individual thigs:
+   for j in range,len(legArr)):
+       LegUp = leg+'1';
+       LegLow = leg+'2';
+       
+       LegUpId = sorted(list(Cal['Servo_Pos']),key=len).index(LegUp);
+       LegLowId = sorted(list(Cal['Servo_Pos']),key=len).index(LegLow);
+       
+       LegUpStartAngle=Servo.id(LegUpId).Angle;
+       LegLowStartAngle=Servo.id(LegLowId).Angle;
+       
+       LegIdArr.append([LegUpId,LegLowId]);
+       LegStartAngleArr.append([LegUpStartAngle,LegLowStartAngle]);
+       
+       
+       legMovemntProgArr.append(0);
+       legLiftDoneArr.append(0);
+       legStepdownDoneArr.append(0);
+       legInitposDoneArr.append(0)
+   
+   while True:
+       
+       for i in range(0,len(legArr2)):
+           leg=legArr2[i]
+           
+           #Lift the Leg
+           if legMovemntProgArr[i]>=1:
+               continue     # if the movement is completed continue with next leg
+           
+           if legLiftDoneArr[i]==0:
+                   
+               
+               
+           else:
+               
+               
+           
+   
 
 def StepAngleCalc(StepWidth, height):
     # Calculate intersection pionts:
@@ -189,17 +243,31 @@ def StepAngleCalc(StepWidth, height):
     
     A=(r1**2-r2**2+d**2+h**2)/(2*h);
     x=symbols("x",real=True);
+    
+    # Nullstellen
     zeros=solve(x**2*(1+d**2/h**2)-2*d/h*x*A+A**2-r1**2,x);
     print(zeros);
 
     # chose one of the intersection points, smaller one
     # and calculate coordinates
     x=min(zeros);
+    x=float(x);
     y=sqrt(r1**2-x**2);
-    a=x/r1
-    print(a)
-    alpha=90-np.arcsin(a)
-    beta=90-alpha-toDeg(np.arcsin((d-x)/r2));
-    print('alpha=',alpha,'  beta=',beta);
+    a=x/r1;
+    print(toDeg(np.arcsin(a)))
+    alpha=toDeg(np.arcsin(a));
+    alphaTot=90-toDeg(np.arcsin(a));
     
     
+    beta=toDeg(np.arccos((d-x)/r2))
+    betaTot=90+alpha+beta
+    print('\n',beta)
+    print('alpha=',alphaTot,'  beta=',betaTot);
+    
+    alphaOff=52
+    betaOff=48
+    
+    alphaFin=alphaTot-alphaOff
+    betaFin=betaTot-betaOff
+    
+    return [alphaFin, betaFin]
