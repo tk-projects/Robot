@@ -184,16 +184,19 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,0,0,0],vel=5):
    # 3. Step down (LegStepDown)
    # 4. Move to init. Position (initPos or LegStand)
    
-   [alphaFin, betaFin] = StepAngleCalc(d,h)
+   [alphaStep, betaStep] = StepAngleCalc(d,h);
+   [alphaInit, betaInit] = StepAngleCalc(0,h);
+   
    betaLift=
    step=vel
    
    LegIdArr=[];             # Array with the ids of the servos
-   LegStartAngleArr=[];     # Array to store starting angles of the servos
    legMovemntProgArr=[];    # Array to track movement progress
    legLiftDoneArr=[];       # Array to track wether lifting was completed
    legStepdownDoneArr=[];   # Array to track wether stepping down was completed
    legInitposDoneArr=[];    # Array to track wether init pos. was completed
+   angleCurLegUpArr=[];     # Array to store starting angles of the upper thigh servos
+   angleCurLegDownArr=[];   # Array to store starting angles of the low er thigh servos
    
    # Get starting position and other parameters of the individual thigs:
    for j in range,len(legArr)):
@@ -206,29 +209,107 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,0,0,0],vel=5):
        LegUpStartAngle=Servo.id(LegUpId).Angle;
        LegLowStartAngle=Servo.id(LegLowId).Angle;
        
-       LegIdArr.append([LegUpId,LegLowId]);
-       LegStartAngleArr.append([LegUpStartAngle,LegLowStartAngle]);
        
+       
+       LegUpIdArr.append(LegUpId);
+       LegLowIdArr.append(LegLowId);
+
+       angleCurLegUpArr.append(LegUpStartAngle);
+       angleCurLegLowArr.append(LegLowStartAngle);
        
        legMovemntProgArr.append(0);
        legLiftDoneArr.append(0);
        legStepdownDoneArr.append(0);
-       legInitposDoneArr.append(0)
+       legInitposDoneArr.append(0);
+    
    
    while True:
        
        for i in range(0,len(legArr2)):
-           leg=legArr2[i]
+           leg=legArr[i]
            
-           #Lift the Leg
-           if legMovemntProgArr[i]>=1:
-               continue     # if the movement is completed continue with next leg
+           if DelayArr[i]:
+               
+           # if the movement is completed continue with next leg       
+           if legMovemntProgArr[i]==1:
+               continue    
            
+           # Leg lift
            if legLiftDoneArr[i]==0:
-                   
                
-               
+               alphaFin=alphaStep;
+               betaFin=betaStep;
+           
+           
            else:
+               # Step down:
+               if legStepdownDoneArr[i]==0:
+                   alphaFin=alphaStep;
+                   betaFin=betaStep-15;
+               # Move to init pos:
+               else:
+                   alphaFin=
+                   betaFin= 
+           
+            
+           # Define directions:
+           if angleCurLegUp<alphaFin:
+                directionLegUp=1;
+            else:
+                directionLegUp=-1;
+            
+            if angleCurLegLow<betaFin:
+                directionLegLow=1;
+            else:
+                directionLegLow=-1;
+            
+            
+            if angleSetLegUp == alphaFin:
+                angleSetLegUp = alphaFin;
+            
+            else:
+                angleSetLegUp = angleCurLegUp+angleStep*directionLegUp;
+                
+                a=alphaFin-angleSetLegUp;
+                if abs(a)<angleStep:   
+                    angleSetLegUp=alphaFin;
+                    #print('\nalpha reached!',angleSetLegUp)
+            
+            if angleSetLegLow == betaFin:
+                angleSetLegLow = betaFin;
+            else:
+                angleSetLegLow = angleCurLegLow+angleStep*directionLegLow;
+                
+                b=betaFin-angleSetLegLow;
+                if abs(b)<angleStep:           
+                    angleSetLegLow=betaFin;
+                    if legLiftDoneArr[i]==0:
+                        legLiftDoneArr[i]=1;
+                    else:
+                        if legStepdownDoneArr[i]==0:
+                            legStepdownDoneArr[i]=1;
+                        else:
+                            legMovemntProgArr[i]=1; 
+                    
+                    print('\nbeta reached!',angleSetLegLow)
+            
+            print('\nleg:',leg,'\nalpha:',angleSetLegUp,'beta:',angleSetLegLow,'    ', i)
+            print('alpha:',angleSetLegUp,'beta:',angleSetLegLow,'    ', i)
+            
+            if angleSetLegUp == alphaFin and angleSetLegLow == betaFin:
+                break
+            
+            
+            # Set current angle
+            angleCurLegUpArr[i]=angleSetLegUp
+            angleCurLegLowArr[i]=angleSetLegLow
+            
+            
+            #Servo.id(LegUpIdArr[i]).Angle=angleSetLegUp
+            #Servo.id(LegLowIdArr[i]).Angle=betaFin
+            i=i+1
+            
+        time.sleep(0.01)
                
                
            
