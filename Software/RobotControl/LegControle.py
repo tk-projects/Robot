@@ -225,13 +225,14 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,0,0,0],vel=5):
    
    while True:
        
-       for i in range(0,len(legArr2)):
+       for i in range(0,len(legArr)):
            leg=legArr[i]
            
-           if DelayArr[i]:
+           if t[i]>=DelayArr[i]:
                
            # if the movement is completed continue with next leg       
            if legMovemntProgArr[i]==1:
+               legProgArr[i]=1
                continue    
            
            # Leg lift
@@ -239,17 +240,21 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,0,0,0],vel=5):
                
                alphaFin=alphaStep;
                betaFin=betaStep;
-           
+               
+               legProg=0
            
            else:
                # Step down:
                if legStepdownDoneArr[i]==0:
                    alphaFin=alphaStep;
                    betaFin=betaStep-15;
+                   legProg=alphaStep+betaStep
+                   
                # Move to init pos:
                else:
-                   alphaFin=
-                   betaFin= 
+                   alphaFin=alphaInit;
+                   betaFin=betaInit;
+                   legProg=2*alphaStep+betaStep+betaStep-15
            
             
            # Define directions:
@@ -285,11 +290,14 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,0,0,0],vel=5):
                     angleSetLegLow=betaFin;
                     if legLiftDoneArr[i]==0:
                         legLiftDoneArr[i]=1;
+                        raw_input("Press Enter to continue...")
                     else:
                         if legStepdownDoneArr[i]==0:
                             legStepdownDoneArr[i]=1;
+                            raw_input("Press Enter to continue...")
                         else:
-                            legMovemntProgArr[i]=1; 
+                            legMovemntProgArr[i]=1;
+                            raw_input("Press Enter to continue...")
                     
                     print('\nbeta reached!',angleSetLegLow)
             
@@ -304,10 +312,11 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,0,0,0],vel=5):
             angleCurLegUpArr[i]=angleSetLegUp
             angleCurLegLowArr[i]=angleSetLegLow
             
-            
+            legProgArr[i]=(alphaFin+betaFin+legProg)/(2*alphaStep+betaStep+betaStep-15+alphaInit+alphaInit);
+            print(str(legProgArr[i]));
             #Servo.id(LegUpIdArr[i]).Angle=angleSetLegUp
             #Servo.id(LegLowIdArr[i]).Angle=betaFin
-            i=i+1
+
             
         time.sleep(0.01)
                
