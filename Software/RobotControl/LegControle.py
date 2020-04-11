@@ -162,77 +162,73 @@ def LegStand(leg, height):
         return [alpha, beta]
     
     
-def LegStep(legArr,StepWidth, height, DelayArr=[0,0,0,0],vel=5):
+def LegStep(legArr,StepWidth, height, DelayArr=[0,1,1,1],vel=5):
     
     d=StepWidth;
     h=min(height,22);
     
-   # to calculate the angles of upper and lower thigh, both thighs will be be represented by two circles
-   # each circle has the radius of the length of one thigh, then the intersection line between both circles will be calculated
-   
-   # intersection line: y = -d/h*x - (r1²-r2²+d²+h²)/(2*h)
-   # of the two circles dont intersect which each other, the step distance is two high and can not be realised
-   # therefore the distance between both circles will be calculated:  
+       # to calculate the angles of upper and lower thigh, both thighs will be be represented by two circles
+       # each circle has the radius of the length of one thigh, then the intersection line between both circles will be calculated
+       
+       # intersection line: y = -d/h*x - (r1²-r2²+d²+h²)/(2*h)
+       # of the two circles dont intersect which each other, the step distance is two high and can not be realised
+       # therefore the distance between both circles will be calculated:  
     m = sqrt(d**2+h**2);
     mLim = l1+l2;
     dMax=sqrt(mLim**2-h**2);
     d=min(StepWidth,dMax);
-
-   # Program sequence:
-   # 1. Angle Calculation (StepAngleCalc)
-   # 2. Lifting of the leg (LegLift)
-   # 3. Step down (LegStepDown)
-   # 4. Move to init. Position (initPos or LegStand)
-   
-   [alphaStep, betaStep] = StepAngleCalc(d,h);
-   [alphaInit, betaInit] = StepAngleCalc(0,h);
-   
-   betaLift=
-   step=vel
-   
-   LegIdArr=[];             # Array with the ids of the servos
-   legMovemntProgArr=[];    # Array to track movement progress
-   legLiftDoneArr=[];       # Array to track wether lifting was completed
-   legStepdownDoneArr=[];   # Array to track wether stepping down was completed
-   legInitposDoneArr=[];    # Array to track wether init pos. was completed
-   angleCurLegUpArr=[];     # Array to store starting angles of the upper thigh servos
-   angleCurLegDownArr=[];   # Array to store starting angles of the low er thigh servos
-   
-   # Get starting position and other parameters of the individual thigs:
-   for j in range,len(legArr)):
-       LegUp = leg+'1';
-       LegLow = leg+'2';
-       
-       LegUpId = sorted(list(Cal['Servo_Pos']),key=len).index(LegUp);
-       LegLowId = sorted(list(Cal['Servo_Pos']),key=len).index(LegLow);
-       
-       LegUpStartAngle=Servo.id(LegUpId).Angle;
-       LegLowStartAngle=Servo.id(LegLowId).Angle;
-       
-       
-       
-       LegUpIdArr.append(LegUpId);
-       LegLowIdArr.append(LegLowId);
-
-       angleCurLegUpArr.append(LegUpStartAngle);
-       angleCurLegLowArr.append(LegLowStartAngle);
-       
-       legMovemntProgArr.append(0);
-       legLiftDoneArr.append(0);
-       legStepdownDoneArr.append(0);
-       legInitposDoneArr.append(0);
     
+       # Program sequence:
+       # 1. Angle Calculation (StepAngleCalc)
+       # 2. Lifting of the leg (LegLift)
+       # 3. Step down (LegStepDown)
+       # 4. Move to init. Position (initPos or LegStand)
+    [alphaStep, betaStep] = StepAngleCalc(d,h);
+    [alphaInit, betaInit] = StepAngleCalc(0,h);
+    
+    alphaLift=alphaStep-15;
+    betaLift=betaStep;
+    step=vel;
+       
+    LegIdArr=[];             # Array with the ids of the servos
+    legMovemntProgArr=[];    # Array to track movement progress
+    legLiftDoneArr=[];       # Array to track wether lifting was completed
+    legStepdownDoneArr=[];   # Array to track wether stepping down was completed
+    legInitposDoneArr=[];    # Array to track wether init pos. was completed
+    angleCurLegUpArr=[];     # Array to store starting angles of the upper thigh servos
+    angleCurLegDownArr=[];   # Array to store starting angles of the low er thigh servos
    
-   while True:
+    # Get starting position and other parameters of the individual thigs:
+    for j in range(0,len(legArr)):
+        LegUp = leg+'1';
+        LegLow = leg+'2';
+        
+        LegUpId = sorted(list(Cal['Servo_Pos']),key=len).index(LegUp);
+        LegLowId = sorted(list(Cal['Servo_Pos']),key=len).index(LegLow);
+       
+        LegUpStartAngle=Servo.id(LegUpId).Angle;
+        LegLowStartAngle=Servo.id(LegLowId).Angle;
+        LegUpIdArr.append(LegUpId);
+        LegLowIdArr.append(LegLowId);
+        angleCurLegUpArr.append(LegUpStartAngle);
+        angleCurLegLowArr.append(LegLowStartAngle);
+   
+        legMovemntProgArr.append(0);
+        legLiftDoneArr.append(0);
+        legStepdownDoneArr.append(0);
+        legInitposDoneArr.append(0);
+
+   
+    while True:
        
        for i in range(0,len(legArr)):
            leg=legArr[i]
            
-           if t[i]>=DelayArr[i]:
+           if DelayArr[i]<legProgArr[min(0,i-1)]:
+               continue
                
            # if the movement is completed continue with next leg       
-           if legMovemntProgArr[i]==1:
-               legProgArr[i]=1
+           if legProgArr[i]>=1:
                continue    
            
            # Leg lift
@@ -260,19 +256,19 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,0,0,0],vel=5):
            # Define directions:
            if angleCurLegUp<alphaFin:
                 directionLegUp=1;
-            else:
+           else:
                 directionLegUp=-1;
             
-            if angleCurLegLow<betaFin:
+           if angleCurLegLow<betaFin:
                 directionLegLow=1;
-            else:
+           else:
                 directionLegLow=-1;
             
             
-            if angleSetLegUp == alphaFin:
+           if angleSetLegUp == alphaFin:
                 angleSetLegUp = alphaFin;
             
-            else:
+           else:
                 angleSetLegUp = angleCurLegUp+angleStep*directionLegUp;
                 
                 a=alphaFin-angleSetLegUp;
@@ -280,9 +276,9 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,0,0,0],vel=5):
                     angleSetLegUp=alphaFin;
                     #print('\nalpha reached!',angleSetLegUp)
             
-            if angleSetLegLow == betaFin:
+           if angleSetLegLow == betaFin:
                 angleSetLegLow = betaFin;
-            else:
+           else:
                 angleSetLegLow = angleCurLegLow+angleStep*directionLegLow;
                 
                 b=betaFin-angleSetLegLow;
@@ -301,24 +297,24 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,0,0,0],vel=5):
                     
                     print('\nbeta reached!',angleSetLegLow)
             
-            print('\nleg:',leg,'\nalpha:',angleSetLegUp,'beta:',angleSetLegLow,'    ', i)
-            print('alpha:',angleSetLegUp,'beta:',angleSetLegLow,'    ', i)
+           print('\nleg:',leg,'\nalpha:',angleSetLegUp,'beta:',angleSetLegLow,'    ', i)
+           print('alpha:',angleSetLegUp,'beta:',angleSetLegLow,'    ', i)
             
-            if angleSetLegUp == alphaFin and angleSetLegLow == betaFin:
+           if angleSetLegUp == alphaFin and angleSetLegLow == betaFin:
                 break
             
             
             # Set current angle
-            angleCurLegUpArr[i]=angleSetLegUp
-            angleCurLegLowArr[i]=angleSetLegLow
+           angleCurLegUpArr[i]=angleSetLegUp
+           angleCurLegLowArr[i]=angleSetLegLow
             
-            legProgArr[i]=(alphaFin+betaFin+legProg)/(2*alphaStep+betaStep+betaStep-15+alphaInit+alphaInit);
-            print(str(legProgArr[i]));
-            #Servo.id(LegUpIdArr[i]).Angle=angleSetLegUp
-            #Servo.id(LegLowIdArr[i]).Angle=betaFin
+           legProgArr[i]=(alphaFin+betaFin+legProg)/(2*alphaStep+betaStep+betaStep-15+alphaInit+alphaInit);
+           print(str(legProgArr[i]));
+           #Servo.id(LegUpIdArr[i]).Angle=angleSetLegUp
+           #Servo.id(LegLowIdArr[i]).Angle=betaFin
 
             
-        time.sleep(0.01)
+       time.sleep(0.01)
                
                
            
