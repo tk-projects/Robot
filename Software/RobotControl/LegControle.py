@@ -162,7 +162,7 @@ def LegStand(leg, height):
         return [alpha, beta]
     
     
-def LegStep(legArr,StepWidth, height, DelayArr=[0,1,1,1],vel=5):
+def LegStep(legArr,StepWidth, height, DelayArr=[1,1,1,1],vel=5):
     
     d=StepWidth;
     h=min(height,22);
@@ -205,59 +205,70 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,1,1,1],vel=5):
     # Get starting position and other parameters of the individual thigs:
     for j in range(0,len(legArr)):
         leg=legArr[j]
-        LegUp = leg+'1';
-        LegLow = leg+'2';
+        legUp = leg+'1';
+        legLow = leg+'2';
         
-        LegUpId = sorted(list(Cal['Servo_Pos']),key=len).index(LegUp);
-        LegLowId = sorted(list(Cal['Servo_Pos']),key=len).index(LegLow);
-       
-        legUpStartAngle=Servo.id(LegUpId).Angle;
-        legLowStartAngle=Servo.id(LegLowId).Angle;
-        legUpIdArr.append(LegUpId);
-        legLowIdArr.append(LegLowId);
+        legUpId = sorted(list(Cal['Servo_Pos']),key=len).index(legUp);
+        legLowId = sorted(list(Cal['Servo_Pos']),key=len).index(legLow);
+        legUpIdArr.append(legUpId)
+        legLowIdArr.append(legLowId)
+        
+        
+        legUpStartAngle=Servo.id(legUpId).Angle;
+        legLowStartAngle=Servo.id(legLowId).Angle;
+        legUpIdArr.append(legUpId);
+        legLowIdArr.append(legLowId);
         angleCurLegUpArr.append(legUpStartAngle);
         angleCurLegLowArr.append(legLowStartAngle);
-   
 
+        
+    print('__________________________________________________________________________________________________________\n__________________________________________________________________________________________________________')     
+    print('\n\nStarting Angles:','alpha',angleCurLegUpArr,' beta ',angleCurLegLowArr)
+    print('\nAngle set points:','\n','alphaLift' ,alphaStep,' betaLift ',betaStep-15)
+    print('\nalphaStep' ,alphaStep,' betaStep ',betaStep)
    
     while True:
        t+=1;
        print(t)
        for i in range(0,len(legArr)):
-           #print('i:',i)
            leg=legArr[i];
            angleCurLegUp=angleCurLegUpArr[i];
            angleCurLegLow=angleCurLegLowArr[i];
            
+           #Monitor movement progress
            print('delay',DelayArr[i],'   progress',legMovemntProgArr[min(0,i-1)])
            
-           if DelayArr[i]>legMovemntProgArr[min(0,i-1)]:
+           # Check if delay to previous leg movement is over
+           if DelayArr[i]<=(legMovemntProgArr[max(0,i-1)]+0.01):
+               print('delayed')
+               print(int(sum(legMovemntProgArr)),len(legArr))
                continue
                
-           # if the movement is completed continue with next leg       
-           if legMovemntProgArr[i]>=1:
+           # if the movement is completed continue with next leg
+           if legMovemntProgArr[i]>=1:      
                continue    
            
            # Leg lift
            if legLiftDoneArr[i]==0:
+               print('\n |\033[4mLifting\033[0m|')
                alphaFin=alphaStep;
-               betaFin=betaStep;
+               betaFin=betaStep-15;
 
-           
-           else:
+           else: 
                # Step down:
                if legStepdownDoneArr[i]==0:
+                   print('\n                |\033[4mStep Down\033[0m|')
                    alphaFin=alphaStep;
-                   betaFin=betaStep-15;
-                   legProg=alphaStep+betaStep
+                   betaFin=betaStep;
+                   legProg=alphaStep+betaStep-15
                    
                # Move to init pos:
                else:
+                   print('\n                          |\033[4mMove to init Position\033[0m|')
                    alphaFin=alphaInit;
                    betaFin=betaInit;
                    legProg=2*alphaStep+betaStep+betaStep-15
            
-            
            # Define directions:
            if angleCurLegUp<alphaFin:
                 directionLegUp=1;
@@ -268,44 +279,61 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,1,1,1],vel=5):
                 directionLegLow=1;
            else:
                 directionLegLow=-1;
-            
-           angleSetLegUp = angleCurLegUp+angleStep*directionLegUp;
+           
+           print('\n',directionLegUp,directionLegLow) 
+           
+           if angleCurLegUpArr[i]==alphaFin:
+               angleSetLegUp=alphaFin
+           else:
+               angleSetLegUp = angleCurLegUp+angleStep*directionLegUp;
                 
            a=alphaFin-angleSetLegUp;
            if abs(a)<angleStep:   
                angleSetLegUp=alphaFin;
-               #print('\nalpha reached!',angleSetLegUp)
+               print('\nalpha reached!',angleSetLegUp)
             
-           angleSetLegLow = angleCurLegLow+angleStep*directionLegLow;
-                
+          
+           if angleCurLegLowArr[i]==betaFin:
+               angleSetLegLow=betaFin
+           else:
+               angleSetLegLow = angleCurLegLow+angleStep*directionLegLow;
+               
            b=betaFin-angleSetLegLow;
            if abs(b)<angleStep:           
                angleSetLegLow=betaFin;
-   
-           
-           if legLiftDoneArr[i]==1:
-               a=1
+               print('\nbeta reached!',angleSetLegLow)
                
 
-            
            print('\nleg:',leg,'\nalpha:',angleSetLegUp,'beta:',angleSetLegLow,'    ', i)
            print('alpha:',angleSetLegUp,'beta:',angleSetLegLow,'    ', i)
             
-           if angleSetLegUp == alphaFin and angleSetLegLow == betaFin:
-                break
-            
-            
-            # Set current angle
+           # Track movement Progress:
+           if angleSetLegUp == alphaStep and angleSetLegLow == betaStep-15:
+               legLiftDoneArr[i]=1
+               print('Lifting done')
+               print('\n\nalphaStep' ,alphaStep,' betaStep ',betaStep)
+               input('press key')
+           
+           if legLiftDoneArr[i]==1:
+               if angleSetLegUp == alphaStep and angleSetLegLow == betaStep:
+                   legStepdownDoneArr[i]=1
+                   print('Step down done')
+                   input('press key')
+               #if legStepdownDoneArr[i]==1 and angleSetLegUp == alphaInit and angleSetLegLow == betaInit:
+                   
+           # Set current angle
            angleCurLegUpArr[i]=angleSetLegUp
            angleCurLegLowArr[i]=angleSetLegLow
             
            legMovemntProgArr[i]=(legProg+angleSetLegUp+angleSetLegUp)/(2*alphaStep+betaStep+betaStep-15+alphaInit+alphaInit);
            print(str(legMovemntProgArr[i]));
-           #Servo.id(LegUpIdArr[i]).Angle=angleSetLegUp
-           #Servo.id(LegLowIdArr[i]).Angle=betaFin
+           print(str(legMovemntProgArr));
+           Servo.id(legUpIdArr[i]).Angle=angleSetLegUp
+           Servo.id(legLowIdArr[i]).Angle=betaFin
 
-            
-       time.sleep(0.01)
+       if int(sum(legMovemntProgArr))==len(legArr):
+           break
+       time.sleep(0.2)
                
                
            
@@ -344,7 +372,7 @@ def StepAngleCalc(StepWidth, height):
     alphaOff=52
     betaOff=48
     
-    alphaFin=alphaTot-alphaOff
-    betaFin=betaTot-betaOff
+    alphaFin=int(round(alphaTot-alphaOff))
+    betaFin=int(round(betaTot-betaOff))
     
     return [alphaFin, betaFin]
