@@ -5,6 +5,10 @@ Created on Sat Mar 21 13:47:50 2020
 
 @author: pi
 """
+import time;
+import numpy as np;
+
+
 
 # Load fuctions
 exec(open("/home/pi/Robot/LoadCalibration.py").read(), globals())
@@ -13,7 +17,7 @@ exec(open("/home/pi/Robot/LegControle.py").read(), globals())
 exec(open("/home/pi/Robot/RobotControl.py").read(), globals())
 
 Servo=ServoClass()
-Cal=LoadCalibration('/home/pi/Robot/RobotSW/Calibration/ServoCalibration.txt')
+Cal=LoadCalibration('/home/pi/Robot/RobotSW/Calibration/ServoCalibration2.txt')
 
 
 
@@ -30,4 +34,8 @@ def toRad(a):
 #initStand(height)
 
 Robot=RobotClass()
-Robot.Stand(21)
+Robot.Stand(21,0.5)
+
+# Set hip angles:
+Servo.id(hg1).Angle=91
+Servo.id(hg2).Angle=94
