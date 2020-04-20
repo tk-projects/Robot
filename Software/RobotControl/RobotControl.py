@@ -5,7 +5,7 @@ Created on Thu Mar 26 12:44:38 2020
 
 @author: pi
 """
-import time
+
 
 # Robot properties
 class RobotClass(object):
@@ -29,9 +29,9 @@ class RobotClass(object):
         heightSpMm=int(round(heightSp*10));
         heightStartMm=int(round(heightStart*10));
         heightActMm=heightStartMm
-        i=0  
+
         print('\nheight at start=',heightStartMm)
-        print('\nheigt set point', heightSpMm)
+        print('\nheigt set point\n', heightSpMm)
         
         while True:
             if heightActMm<heightSpMm:
@@ -40,26 +40,19 @@ class RobotClass(object):
                 direction=-1
             
             if abs(heightSpMm-heightActMm)<Step:
-                heightActMm=heightSpMm
+                heightActMm=heightSpMm                  # Check if step distance is bigger than difference to set point
             else:
                 heightActMm=heightActMm+direction*Step
             
             for leg in legs:
                 offs=0
                 if leg=='hl' or leg=='hr':
-                    offs=0   
+                    offs=0 
                 LegStand(leg, heightActMm/10+offs)
                 
-            a=heightActMm;
-            print(a)
-            i=i+1
-
             self.height=heightActMm/10
             
             if heightActMm==heightSpMm:
-                break
-            
-            if i>60:
                 break
             time.sleep(0.00001)
         return self.height
