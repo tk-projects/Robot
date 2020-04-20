@@ -13,7 +13,7 @@ class RobotClass(object):
         self.height=21
         
         
-    def Stand(self, heightSp, vel=1):
+    def Stand(self, heightSp, vel=0.5):
         legs=['vl','vr','hl','hr']
         heightStart=self.height
         
