@@ -371,7 +371,7 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,1,1,1],vel=5):
     betaLift=betaStep-15;
     angleStep=vel;
     
-    legMovemntProgTracking=[]
+    legMovemntProgTracking=[];
     LegIdArr=[];                                # Array with the ids of the servos
     legMovemntProgArr=np.zeros([legNum,1])     # Array to track movement progress
     legLiftDoneArr=np.zeros([legNum,1]);        # Array to track wether lifting was completed
@@ -441,25 +441,25 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,1,1,1],vel=5):
            
            # Leg lift
            if legLiftDoneArr[i]==0:
-               #print('\n |\033[4mLifting\033[0m|')
+               print('\n |\033[4mLifting\033[0m|')
                alphaFin=alphaLift;
                betaFin=betaLift;
 
-           else: 
+           if legLiftDoneArr[i]==1: 
                # Step down:
                if legStepdownDoneArr[i]==0:
-                   #print('\n                |\033[4mStep Down\033[0m|')
+                   print('\n                |\033[4mStep Down\033[0m|')
                    alphaFin=alphaStep;
                    betaFin=betaStep;
-                   legProg=abs(alphaLift-legUpStartAngle)+abs(betaLift-legLowStartAngle);
+                   #legProg=abs(alphaLift-legUpStartAngle)+abs(betaLift-legLowStartAngle);
                    legUpStartAngle=alphaLift;
                    legLowStartAngle=betaLift;
                # Move to init pos:
                else:
-                   #print('\n                          |\033[4mMove to init Position\033[0m|')
+                   print('\n                          |\033[4mMove to init Position\033[0m|')
                    alphaFin=alphaInit;
                    betaFin=betaInit;
-                   legProg=abs(alphaLift-legUpStartAngle)+abs(alphaStep-alphaLift)+abs(betaLift-legLowStartAngle)+abs(betaStep-betaLift);
+                   #legProg=abs(alphaLift-legUpStartAngle)+abs(alphaStep-alphaLift)+abs(betaLift-legLowStartAngle)+abs(betaStep-betaLift);
                    legUpStartAngle=alphaStep;
                    legLowStartAngle=betaStep;
            
@@ -520,7 +520,9 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,1,1,1],vel=5):
            angleCurLegLowArr[i]=angleSetLegLow
             
            #legMovemntProgArr[i]=(legProg+angleSetLegUp+angleSetLegUp)/(2*alphaStep+betaStep+betaStep-15+alphaInit+alphaInit);
-           legMovemntProgArr[i]=(legProg+abs(alphaFin-legUpStartAngle)-abs(alphaFin-angleSetLegUp)+abs(betaFin-legLowStartAngle)-abs(betaFin-angleSetLegLow))/(legUpMovemntTot+legLowMovemntTot)
+           #legMovemntProgArr[i]=(legProg+abs(alphaFin-legUpStartAngle)-abs(alphaFin-angleSetLegUp)+abs(betaFin-legLowStartAngle)-abs(betaFin-angleSetLegLow))/(legUpMovemntTot+legLowMovemntTot)
+           print('Dif alphaSP-alphaStart: ',str(abs(alphaFin-legUpStartAngle)),'     Dif alphaSP-alphaCurrent: ',str(alphaFin-angleSetLegUp))
+           legMovemntProgArr[i]=(legMovemntProgArr[i]/(legUpMovemntTot+legLowMovemntTot)+abs(alphaFin-legUpStartAngle)-abs(alphaFin-angleSetLegUp)+abs(betaFin-legLowStartAngle)-abs(betaFin-angleSetLegLow))/(legUpMovemntTot+legLowMovemntTot)
            #print(str(legMovemntProgArr[i]));
            #print(str(legMovemntProgArr));
            #print('current leg id upper thig: ',legUpIdArr[i]);
@@ -533,13 +535,16 @@ def LegStep(legArr,StepWidth, height, DelayArr=[0,1,1,1],vel=5):
 
        if int(sum(legMovemntProgArr))==len(legArr):
            break
-       time.sleep(0.5)
+       time.sleep(0.1)
        legMovemntProgTracking.append(legMovemntProgArr[i])
        print(legMovemntProgArr)
        
        #plt.figure(figsize=(13,5));
+       #print(legMovemntProgTracking)
        plt.plot(legMovemntProgTracking)
-
+       
+    return legMovemntProgTracking
+    
 def StepAngleCalc(StepWidth, height):
     # Calculate intersection pionts:
     # intersection line: y = -d/h*x - (r1²-r2²+d²+h²)/(2*h)
